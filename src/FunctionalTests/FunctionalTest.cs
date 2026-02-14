@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using DotNetEnv;
 using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
@@ -27,6 +28,23 @@ public abstract partial class FunctionalTest : PageTest
             ViewportSize = new ViewportSize() { Width = 1280, Height = 720 },
             BaseURL = GetRequiredParameter("webAppUrl")
         };
+    #endregion
+
+    #region Setup and Teardown
+
+    [SetUp]
+    public async Task SetUpBase()
+    {
+        // By convention, I put data-test-id attributes on important elements
+        Playwright.Selectors.SetTestIdAttribute("data-test-id");
+
+        // Note that this does need to be done in setup, because we get a new
+        // browser context every time. Is there a place we could tell Playwright
+        // this just ONCE??
+        var defaultTimeoutParam = TestContext.Parameters["defaultTimeout"];
+        if (Int32.TryParse(defaultTimeoutParam, out var val))
+            Context.SetDefaultTimeout(val);
+    }
     #endregion
 
     #region Parameter Handling
