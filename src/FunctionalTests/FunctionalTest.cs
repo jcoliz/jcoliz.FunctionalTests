@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using DotNetEnv;
+using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
 
@@ -17,6 +18,17 @@ namespace jcoliz.FunctionalTests;
 /// </remarks>
 public abstract partial class FunctionalTest : PageTest
 {
+    #region Overrides
+
+    public override BrowserNewContextOptions ContextOptions() =>
+        new()
+        {
+            AcceptDownloads = true,
+            ViewportSize = new ViewportSize() { Width = 1280, Height = 720 },
+            BaseURL = GetRequiredParameter("webAppUrl")
+        };
+    #endregion
+
     #region Parameter Handling
 
     private static bool _environmentVariablesLoaded = false;
@@ -150,5 +162,5 @@ public abstract partial class FunctionalTest : PageTest
     [GeneratedRegex(@"\{(.*?)\}")]
     private static partial Regex EnvVarRegex();
 
-#endregion
+    #endregion
 }
