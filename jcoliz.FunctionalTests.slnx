@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/FunctionalTests/">
+    <Project Path="src/FunctionalTests/jcoliz.FunctionalTests.csproj" />
+  </Folder>
+</Solution>
