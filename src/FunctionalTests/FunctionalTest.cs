@@ -19,6 +19,11 @@ namespace jcoliz.FunctionalTests;
 /// </remarks>
 public abstract partial class FunctionalTest : PageTest
 {
+    #region Fields
+    protected ObjectStore _objectStore = new();
+
+    #endregion
+
     #region Overrides
 
     public override BrowserNewContextOptions ContextOptions() =>
@@ -44,6 +49,9 @@ public abstract partial class FunctionalTest : PageTest
         var defaultTimeoutParam = TestContext.Parameters["defaultTimeout"];
         if (Int32.TryParse(defaultTimeoutParam, out var val))
             Context.SetDefaultTimeout(val);
+
+        // Need a fresh object store for each test
+        _objectStore = new ObjectStore();
     }
     #endregion
 
