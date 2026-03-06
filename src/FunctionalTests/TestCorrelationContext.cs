@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Web;
+using Microsoft.Playwright;
 using NUnit.Framework;
 
 namespace jcoliz.FunctionalTests;
@@ -73,6 +74,22 @@ public sealed class TestCorrelationContext : IDisposable
             ["X-Test-Name"] = HttpUtility.UrlEncode(_testName),
             ["X-Test-Id"] = _testId,
             ["X-Test-Class"] = _testClass
+        };
+    }
+
+    /// <summary>
+    /// Builds a Playwright cookie for test-name correlation.
+    /// </summary>
+    /// <param name="domain">The domain to set the cookie on (typically the web app host).</param>
+    /// <returns>A <see cref="Cookie"/> with name <c>x-test-name</c> containing the URL-encoded test name.</returns>
+    public Cookie BuildCorrelationCookie(string domain)
+    {
+        return new Cookie()
+        {
+            Name = "x-test-name",
+            Value = HttpUtility.UrlEncode(_testName),
+            Domain = domain,
+            Path = "/"
         };
     }
 
