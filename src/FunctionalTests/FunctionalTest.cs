@@ -22,7 +22,15 @@ public abstract partial class FunctionalTest : PageTest
     #region Fields
     protected ObjectStore _objectStore = new();
 
-    private static string? _cachedWebAppUrl;
+    /// <summary>
+    /// Gets the test correlation context for distributed tracing.
+    /// </summary>
+    /// <remarks>
+    /// Created in <see cref="SetUpBase"/> and disposed in <see cref="TearDownBase"/>.
+    /// Subclasses can use this to attach correlation headers to HTTP clients
+    /// via <see cref="TestCorrelationContext.BuildCorrelationHeaders"/>.
+    /// </remarks>
+    protected TestCorrelationContext? _correlationContext;
 
     /// <summary>
     /// Gets the cached web application URL, resolving it from test parameters on first access.
@@ -32,6 +40,7 @@ public abstract partial class FunctionalTest : PageTest
     /// in a static field for all subsequent accesses across test instances.
     /// </remarks>
     protected static string WebAppUrl => _cachedWebAppUrl ??= GetRequiredParameter("webAppUrl");
+    private static string? _cachedWebAppUrl;
 
     #endregion
 
@@ -68,6 +77,10 @@ public abstract partial class FunctionalTest : PageTest
         // offered by the page object model (like ScreenShotAsync) without needing to pass around the page object itself
         _objectStore.Add(new PageObjectModel(Page));
 
+        // Create test correlation context for distributed tracing
+        // and set correlation headers on the browser context
+        _correlationContext = new TestCorrelationContext(TestContext.CurrentContext.Test);
+        await Context.SetExtraHTTPHeadersAsync(_correlationContext.BuildCorrelationHeaders());
     }
 
     [TearDown]
@@ -79,6 +92,10 @@ public abstract partial class FunctionalTest : PageTest
             var pageModel = _objectStore.Get<PageObjectModel>();
             await pageModel.SaveScreenshotAsync($"FAILED");
         }
+
+        // Dispose test correlation context
+        _correlationContext?.Dispose();
+        _correlationContext = null;
     }
 
     #endregion
