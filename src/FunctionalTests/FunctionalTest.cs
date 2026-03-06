@@ -22,6 +22,17 @@ public abstract partial class FunctionalTest : PageTest
     #region Fields
     protected ObjectStore _objectStore = new();
 
+    private static string? _cachedWebAppUrl;
+
+    /// <summary>
+    /// Gets the cached web application URL, resolving it from test parameters on first access.
+    /// </summary>
+    /// <remarks>
+    /// The value is resolved once from <c>GetRequiredParameter("webAppUrl")</c> and cached
+    /// in a static field for all subsequent accesses across test instances.
+    /// </remarks>
+    protected static string WebAppUrl => _cachedWebAppUrl ??= GetRequiredParameter("webAppUrl");
+
     #endregion
 
     #region Overrides
@@ -31,7 +42,7 @@ public abstract partial class FunctionalTest : PageTest
         {
             AcceptDownloads = true,
             ViewportSize = new ViewportSize() { Width = 1280, Height = 720 },
-            BaseURL = GetRequiredParameter("webAppUrl")
+            BaseURL = WebAppUrl
         };
     #endregion
 
