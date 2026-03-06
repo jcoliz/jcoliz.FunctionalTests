@@ -13,7 +13,7 @@ namespace jcoliz.FunctionalTests;
 /// <remarks>
 /// Provides common cross-domain functionality for page object models. Inherit from this class to create a page object model.
 /// </remarks>
-public abstract partial class PageObjectModel(IPage page)
+public partial class PageObjectModel(IPage page)
 {
     /// <summary>
     /// Gets the page title from the browser

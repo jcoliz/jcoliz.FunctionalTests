@@ -52,7 +52,24 @@ public abstract partial class FunctionalTest : PageTest
 
         // Need a fresh object store for each test
         _objectStore = new ObjectStore();
+
+        // Add a basepage object to the object store, so we can later get at the functionality
+        // offered by the page object model (like ScreenShotAsync) without needing to pass around the page object itself
+        _objectStore.Add(new PageObjectModel(Page));
+
     }
+
+    [TearDown]
+    public async Task TearDownBase()
+    {
+        // Capture screenshot only on test failure
+        if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
+        {
+            var pageModel = _objectStore.Get<PageObjectModel>();
+            await pageModel.SaveScreenshotAsync($"FAILED");
+        }
+    }
+
     #endregion
 
     #region Parameter Handling
