@@ -61,7 +61,7 @@ public sealed class TestCorrelationContext : IDisposable
     ///   <item><c>X-Test-Class</c> — Fully-qualified test class name</item>
     /// </list>
     /// </returns>
-    public Dictionary<string, string> BuildCorrelationHeaders()
+    public Dictionary<string, string> BuildCorrelationHeaders(string client = "Playwright")
     {
         var traceParent = $"00-{_activity.TraceId}-{_activity.SpanId}-01";
 
@@ -73,7 +73,8 @@ public sealed class TestCorrelationContext : IDisposable
             // Direct test correlation (fallback and convenience)
             ["X-Test-Name"] = HttpUtility.UrlEncode(_testName),
             ["X-Test-Id"] = _testId,
-            ["X-Test-Class"] = _testClass
+            ["X-Test-Class"] = _testClass,
+            ["X-Test-Client"] = client
         };
     }
 
