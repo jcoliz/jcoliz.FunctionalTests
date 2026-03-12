@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DotNetEnv;
@@ -42,6 +43,12 @@ public abstract partial class FunctionalTest : PageTest
     protected static string WebAppUrl => _cachedWebAppUrl ??= GetRequiredParameter("webAppUrl");
     private static string? _cachedWebAppUrl;
 
+    protected static string ApiUrl => _cachedApiUrl ??= GetRequiredParameter("apiUrl");
+    private static string? _cachedApiUrl;
+
+    protected HttpClient HttpClient => _httpClient ??= CreateHttpClient();
+    private HttpClient? _httpClient;
+
     #endregion
 
     #region Overrides
@@ -77,6 +84,10 @@ public abstract partial class FunctionalTest : PageTest
         // offered by the page object model (like ScreenShotAsync) without needing to pass around the page object itself
         _objectStore.Add(new PageObjectModel(Page));
 
+        // Reset HttpClient so it gets recreated with fresh correlation headers
+        _httpClient?.Dispose();
+        _httpClient = null;
+
         // Create test correlation context for distributed tracing
         // and set correlation headers on the browser context
         _correlationContext = new TestCorrelationContext(TestContext.CurrentContext.Test);
@@ -92,6 +103,10 @@ public abstract partial class FunctionalTest : PageTest
             var pageModel = _objectStore.Get<PageObjectModel>();
             await pageModel.SaveScreenshotAsync($"FAILED");
         }
+
+        // Dispose HttpClient to release sockets
+        _httpClient?.Dispose();
+        _httpClient = null;
 
         // Dispose test correlation context
         _correlationContext?.Dispose();
@@ -126,6 +141,30 @@ public abstract partial class FunctionalTest : PageTest
         var page = (T)Activator.CreateInstance(typeof(T), Page)!;
         _objectStore.Add(page);
         return page;
+    }
+
+    #endregion
+
+    #region HTTP Client Preparation
+
+    /// <summary>
+    /// Creates an HttpClient with correlation headers set as default request headers,
+    /// ensuring all requests (including login) include tracing context.
+    /// </summary>
+    private HttpClient CreateHttpClient()
+    {
+        var client = new HttpClient() { BaseAddress = new Uri(ApiUrl) };
+
+        var correlationHeaders = _correlationContext?.BuildCorrelationHeaders("HttpClient");
+        if (correlationHeaders is not null)
+        {
+            foreach (var header in correlationHeaders)
+            {
+                client.DefaultRequestHeaders.TryAddWithoutValidation(header.Key, header.Value);
+            }
+        }
+
+        return client;
     }
 
     #endregion
