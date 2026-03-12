@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -49,6 +50,8 @@ public abstract partial class FunctionalTest : PageTest
     protected HttpClient HttpClient => _httpClient ??= CreateHttpClient();
     private HttpClient? _httpClient;
 
+    private readonly Dictionary<string, Func<Task>> _afterTestCleanupActions = new();
+
     #endregion
 
     #region Overrides
@@ -97,6 +100,13 @@ public abstract partial class FunctionalTest : PageTest
     [TearDown]
     public async Task TearDownBase()
     {
+        // Execute and clear registered cleanup actions
+        foreach (var action in _afterTestCleanupActions.Values)
+        {
+            await action();
+        }
+        _afterTestCleanupActions.Clear();
+
         // Capture screenshot only on test failure
         if (TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed)
         {
@@ -111,6 +121,21 @@ public abstract partial class FunctionalTest : PageTest
         // Dispose test correlation context
         _correlationContext?.Dispose();
         _correlationContext = null;
+    }
+
+    #endregion
+
+    #region Cleanup Actions
+
+    /// <summary>
+    /// Registers an async cleanup action to be executed after the test completes.
+    /// Actions are keyed for uniqueness — registering the same key again is a no-op.
+    /// </summary>
+    /// <param name="key">Unique key to prevent duplicate registrations.</param>
+    /// <param name="action">The async cleanup action to execute during teardown.</param>
+    public void AddCleanupAction(string key, Func<Task> action)
+    {
+        _afterTestCleanupActions.TryAdd(key, action);
     }
 
     #endregion
