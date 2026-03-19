@@ -49,6 +49,9 @@ public abstract partial class FunctionalTest : PageTest
     protected static string ApiUrl => _cachedApiUrl ??= GetRequiredParameter("apiUrl");
     private static string? _cachedApiUrl;
 
+    protected string ViewportSizeLabel => _cachedViewportSizeLabel ??= GetOptionalParameter("viewportSize")?.ToLowerInvariant() ?? "xl";
+    private static string? _cachedViewportSizeLabel;
+
     protected HttpClient HttpClient => _httpClient ??= CreateHttpClient();
     private HttpClient? _httpClient;
 
@@ -62,8 +65,24 @@ public abstract partial class FunctionalTest : PageTest
         new()
         {
             AcceptDownloads = true,
-            ViewportSize = new ViewportSize() { Width = 1280, Height = 720 },
-            BaseURL = WebAppUrl
+            BaseURL = WebAppUrl,
+            ViewportSize = ViewportSizeLabel switch
+            {
+                // iPhone 12 Pro
+                "xs" => new ViewportSize() { Width = 390, Height = 844 },
+
+                // iPad Mini
+                "md" => new ViewportSize() { Width = 768, Height = 1024 },
+
+                // iPad Mini Landscape
+                "lg" => new ViewportSize() { Width = 1024, Height = 768 },
+
+                // Surface Pro 7 Landscape
+                "xl" => new ViewportSize() { Width = 1368, Height = 912 },
+
+                _ => throw new NotImplementedException()
+            }
+
         };
     #endregion
 
