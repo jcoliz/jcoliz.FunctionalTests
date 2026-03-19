@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace jcoliz.FunctionalTests;
 
-public class BuiltInSteps(FunctionalTest functionalTest)
+public class BuiltInSteps(IBaseStepCapabilities context)
 {
     protected async Task UserHasLaunchedTheSite()
     {
@@ -17,11 +17,11 @@ public class BuiltInSteps(FunctionalTest functionalTest)
     /// </summary>
     protected async Task UserLaunchesSite()
     {
-        var pageModel = functionalTest.GetOrCreatePage<PageObjectModel>();
+        var pageModel = context.GetOrCreatePage<PageObjectModel>();
 
         var result = await pageModel.LaunchSite();
 
-        functionalTest.ObjectStore.Add( result! );
+        context.ObjectStore.Add( result! );
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class BuiltInSteps(FunctionalTest functionalTest)
     {
         // We need the exact KIND of page model here, because the reload page logic
         // will check to ensure the RIGHT page was reloaded.
-        var pageModel = functionalTest.ObjectStore.Get<PageObjectModel>("CurrentPage");
+        var pageModel = context.ObjectStore.Get<PageObjectModel>("CurrentPage");
         await pageModel.ReloadPageAsync();
     }
 
@@ -43,7 +43,7 @@ public class BuiltInSteps(FunctionalTest functionalTest)
     /// </summary>
     protected Task ThenPageLoadedOk()
     {
-        var response = functionalTest.ObjectStore.Get<IResponse>();
+        var response = context.ObjectStore.Get<IResponse>();
 
         Assert.That(response!.Ok, Is.True);
 
@@ -55,7 +55,7 @@ public class BuiltInSteps(FunctionalTest functionalTest)
     /// </summary>
     protected async Task SaveAScreenshot()
     {
-        var pageModel = functionalTest.GetOrCreatePage<PageObjectModel>();
+        var pageModel = context.GetOrCreatePage<PageObjectModel>();
         await pageModel.SaveScreenshotAsync();
     }
 
@@ -64,7 +64,7 @@ public class BuiltInSteps(FunctionalTest functionalTest)
     /// </summary>
     public async Task SaveAScreenshotNamed(string name)
     {
-        var pageModel = functionalTest.GetOrCreatePage<PageObjectModel>();
+        var pageModel = context.GetOrCreatePage<PageObjectModel>();
         await pageModel.SaveScreenshotAsync(moment: name, fullPage: false);
     }
 }

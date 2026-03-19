@@ -19,7 +19,7 @@ namespace jcoliz.FunctionalTests;
 /// * Parameter handling with environment variable support: GetRequiredParameter method resolves {ENV_VAR} references from .runsettings and .env files.
 /// * Environment variable loading: Automatically loads environment variables from .env file if it exists, allowing flexible configuration without hardcoding values in .runsettings.
 /// </remarks>
-public abstract partial class FunctionalTest : PageTest
+public abstract partial class FunctionalTest : PageTest, IBaseStepCapabilities
 {
     #region Fields
     public ObjectStore ObjectStore => _objectStore;
