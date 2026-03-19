@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using Microsoft.Playwright;
 
 namespace jcoliz.FunctionalTests;
@@ -28,4 +30,12 @@ public interface IBaseStepCapabilities
     /// <typeparam name="T">The type of the page object model.</typeparam>
     /// <returns>The page object model instance.</returns>
     T GetOrCreatePage<T>() where T : PageObjectModel;
+
+    /// <summary>
+    /// Registers an async cleanup action to be executed after the test completes.
+    /// Actions are keyed for uniqueness — registering the same key again is a no-op.
+    /// </summary>
+    /// <param name="key">Unique key to prevent duplicate registrations.</param>
+    /// <param name="action">The async cleanup action to execute during teardown.</param>
+    void AddCleanupAction(string key, Func<Task> action);
 }
