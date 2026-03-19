@@ -22,7 +22,9 @@ namespace jcoliz.FunctionalTests;
 public abstract partial class FunctionalTest : PageTest
 {
     #region Fields
-    protected ObjectStore _objectStore = new();
+    public ObjectStore ObjectStore => _objectStore;
+
+    private ObjectStore _objectStore = new();
 
     /// <summary>
     /// Gets the test correlation context for distributed tracing.
@@ -222,6 +224,26 @@ public abstract partial class FunctionalTest : PageTest
             throw new InvalidOperationException(
                 $"Required test parameter '{parameterName}' is not set in .runsettings file."
             );
+        }
+
+        return ResolveEnvironmentVariables(rawValue, parameterName);
+    }
+
+    /// <summary>
+    /// Gets an optional test parameter and resolves any environment variable references.
+    /// </summary>
+    /// <param name="parameterName">Name of the test parameter to retrieve.</param>
+    /// <returns>The parameter value with any environment variable references resolved, or null if the parameter is not set.</returns>
+    protected static string? GetOptionalParameter(string parameterName)
+    {
+        // Ensure environment variables are loaded before resolving parameters
+        EnsureEnvironmentVariablesLoaded();
+
+        var rawValue = TestContext.Parameters[parameterName];
+
+        if (string.IsNullOrWhiteSpace(rawValue))
+        {
+            return null;
         }
 
         return ResolveEnvironmentVariables(rawValue, parameterName);

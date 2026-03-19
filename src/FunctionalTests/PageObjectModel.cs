@@ -34,6 +34,14 @@ public partial class PageObjectModel(IPage page)
     }
 
     /// <summary>
+    /// Reloads the current page
+    /// </summary>
+    public virtual async Task ReloadPageAsync()
+    {
+        await page.ReloadAsync();
+    }
+
+    /// <summary>
     /// Checks if a control is available for interaction (both visible and enabled).
     /// </summary>
     /// <param name="locator">The locator for the control to check</param>
@@ -80,7 +88,6 @@ public partial class PageObjectModel(IPage page)
 
         throw new TimeoutException($"Locator did not become enabled within {timeout}ms");
     }
-
 
     /// <summary>
     /// Executes an action and waits for a matching API response
