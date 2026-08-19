@@ -67,4 +67,20 @@ public class BuiltInSteps(IBaseStepCapabilities context)
         var pageModel = context.GetOrCreatePage<PageObjectModel>();
         await pageModel.SaveScreenshotAsync(moment: name, fullPage: false);
     }
+
+    /// <summary>
+    /// Given not running against 'named' environment
+    /// </summary>
+    public async Task GivenNotRunningAgainstNamedEnvironment(string environmentName)
+    {
+        if (context.TargetEnvironment is null)
+        {
+            Assert.Fail($"Test failed because no target environment it is required to not be '{environmentName}', but a value was not set. Please set the 'environment' test parameter to the target environment name (Local, Container, Production).");
+        }
+        if (context.TargetEnvironment == environmentName)
+        {
+            Assert.Ignore($"Test ignored because it is running against the '{environmentName}' environment.");
+        }
+    }
+
 }

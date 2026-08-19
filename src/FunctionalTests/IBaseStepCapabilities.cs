@@ -38,4 +38,12 @@ public interface IBaseStepCapabilities
     /// <param name="key">Unique key to prevent duplicate registrations.</param>
     /// <param name="action">The async cleanup action to execute during teardown.</param>
     void AddCleanupAction(string key, Func<Task> action);
+
+    /// <summary>
+    /// Gets the target environment for the test, if specified.
+    /// </summary>
+    /// <remarks>
+    /// This can be used to configure test behavior based on the environment being tested.
+    /// </remarks>
+    public string? TargetEnvironment { get; }
 }

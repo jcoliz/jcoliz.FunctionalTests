@@ -55,6 +55,9 @@ public abstract partial class FunctionalTest : PageTest, IBaseStepCapabilities
     protected HttpClient HttpClient => _httpClient ??= CreateHttpClient();
     private HttpClient? _httpClient;
 
+    public string? TargetEnvironment => _cachedTargetEnvironment ??= GetOptionalParameter("environment");
+    private static string? _cachedTargetEnvironment;
+
     private readonly Dictionary<string, Func<Task>> _afterTestCleanupActions = new();
 
     #endregion
