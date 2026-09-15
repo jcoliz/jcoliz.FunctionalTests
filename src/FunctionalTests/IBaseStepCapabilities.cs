@@ -46,4 +46,9 @@ public interface IBaseStepCapabilities
     /// This can be used to configure test behavior based on the environment being tested.
     /// </remarks>
     public string? TargetEnvironment { get; }
+
+    /// <summary>
+    /// Gets the label representing the current viewport size (e.g., "xs", "md", "lg", "xl").
+    /// </summary>
+    public string ViewportSizeLabel { get; }
 }

@@ -49,7 +49,7 @@ public abstract partial class FunctionalTest : PageTest, IBaseStepCapabilities
     protected static string ApiUrl => _cachedApiUrl ??= GetRequiredParameter("apiUrl");
     private static string? _cachedApiUrl;
 
-    protected string ViewportSizeLabel => _cachedViewportSizeLabel ??= GetOptionalParameter("viewportSize")?.ToLowerInvariant() ?? "xl";
+    public string ViewportSizeLabel => _cachedViewportSizeLabel ??= GetOptionalParameter("viewportSize")?.ToLowerInvariant() ?? "xl";
     private static string? _cachedViewportSizeLabel;
 
     /// <summary>
