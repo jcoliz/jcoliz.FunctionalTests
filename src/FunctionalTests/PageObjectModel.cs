@@ -107,21 +107,26 @@ public partial class PageObjectModel(IPage page)
     /// </summary>
     /// <param name="moment">Optional moment identifier for the screenshot filename</param>
     /// <param name="fullPage">Whether to capture the full page or just the viewport</param>
-    public async Task SaveScreenshotAsync(string? moment = null, bool fullPage = true)
+    /// <returns>The filename of the saved screenshot</returns>
+    public async Task<string> SaveScreenshotAsync(string? moment = null, bool fullPage = true)
     {
         // TODO: Centralize test context parameters in a single class to avoid scattering TestContext.Parameters calls throughout the codebase
+        // This should probably to through IBaseStepCapabilities instead of directly accessing TestContext.Parameters
+
         var context = TestContext.Parameters["screenshotContext"] ?? "Local";
+        var viewportSizeLabel = TestContext.Parameters["viewportSize"]?.ToLowerInvariant() ?? "xl";
         var testclassfull = $"{TestContext.CurrentContext.Test.ClassName}";
         var testclass = testclassfull.Split(".").Last();
         var testname = MakeValidFileName($"{TestContext.CurrentContext.Test.Name}");
         var displaymoment = string.IsNullOrEmpty(moment) ? string.Empty : $"-{moment.Replace('/','-')}";
-        var filename = $"Screenshot/{context}/{testclass}/{testname}{displaymoment}.png";
+        var filename = $"Screenshot/{context}/{viewportSizeLabel}/{testclass}/{testname}{displaymoment}.png";
         await page.ScreenshotAsync(new PageScreenshotOptions() { Path = filename, OmitBackground = true, FullPage = fullPage });
         TestContext.AddTestAttachment(filename);
+        return filename;
     }
 
     // https://stackoverflow.com/questions/309485/c-sharp-sanitize-file-name
-    private static string MakeValidFileName( string name )
+    public static string MakeValidFileName( string name )
     {
         var invalidChars = System.Text.RegularExpressions.Regex.Escape( new string( System.IO.Path.GetInvalidFileNameChars() ) );
         var invalidRegStr = string.Format( @"([{0}]*\.+$)|([{0}]+)", invalidChars );
