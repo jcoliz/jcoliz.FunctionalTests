@@ -52,6 +52,16 @@ public abstract partial class FunctionalTest : PageTest, IBaseStepCapabilities
     protected string ViewportSizeLabel => _cachedViewportSizeLabel ??= GetOptionalParameter("viewportSize")?.ToLowerInvariant() ?? "xl";
     private static string? _cachedViewportSizeLabel;
 
+    /// <summary>
+    /// Gets a value indicating whether correlation headers are enabled for the test.
+    /// </summary>
+    /// <remarks>
+    /// There are cases where we are calling out to external sites which will reject requests with unknown headers, 
+    /// so we need to disable correlation headers in those scenarios.
+    /// </remarks>
+    protected bool CorrelationHeadersEnabled => _cachedCorrelationHeadersEnabled ??= bool.Parse(GetOptionalParameter("correlationHeaders") ?? "true");
+    private static bool? _cachedCorrelationHeadersEnabled;
+
     protected HttpClient HttpClient => _httpClient ??= CreateHttpClient();
     private HttpClient? _httpClient;
 
@@ -117,8 +127,11 @@ public abstract partial class FunctionalTest : PageTest, IBaseStepCapabilities
 
         // Create test correlation context for distributed tracing
         // and set correlation headers on the browser context
-        _correlationContext = new TestCorrelationContext(TestContext.CurrentContext.Test);
-        await Context.SetExtraHTTPHeadersAsync(_correlationContext.BuildCorrelationHeaders());
+        if (CorrelationHeadersEnabled)
+        {
+            _correlationContext = new TestCorrelationContext(TestContext.CurrentContext.Test);
+            await Context.SetExtraHTTPHeadersAsync(_correlationContext.BuildCorrelationHeaders());
+        }
     }
 
     [TearDown]
